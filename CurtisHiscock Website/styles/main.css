@@ -1,0 +1,16 @@
+/*
+:root {
+
+}
+
+* {
+
+}
+*/
+
+header nav {
+    display: flex;
+    gap: 1em;
+    flex-direction: column;
+}
+
