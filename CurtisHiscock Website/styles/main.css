@@ -14,3 +14,7 @@ header nav {
     flex-direction: column;
 }
 
+header button {
+    display: flex;
+    align-self: flex-end;
+}
