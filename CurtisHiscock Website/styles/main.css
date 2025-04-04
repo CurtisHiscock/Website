@@ -2,19 +2,65 @@
 :root {
 
 }
+*/
 
 * {
-
+    background-color: #F4F5F6;
+    color: #241920;
 }
-*/
 
 header nav {
     display: flex;
-    gap: 1em;
-    flex-direction: column;
+    gap: 2em;
+    flex-direction: row;
+    align-items: center;
+    justify-content: center;
 }
 
-header button {
+button {
+border: 0;
+
+background-color: #F4F5F6;
+color: #241920;
+transition: background-color 0.3s ease, color 0.3s ease;
+    
+user-select: none;
+cursor: pointer;
+font-weight: bolder;
+}
+
+header nav button {
+border-radius: 0.5em;
+padding: 0.7em;
+margin: 1em 0em;
+font-size: 1em;
+}
+
+#home > button {
+    border-radius: 4em;
+    padding: 0.2em 0.45em;
+    margin: 0.3em auto;
     display: flex;
-    align-self: flex-end;
+    justify-content: center;
+    font-size: 4em;
+}
+
+button:hover{
+background-color: #241920;
+color: #F4F5F6;
+transition: 0.5s ease;
+}
+
+body{
+    margin: 0; /* Watch out for this he is evil*/
+}
+
+img {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    border-radius: 1em;
+    max-width: fit-content;
+    max-height: 47em;
+    user-select: none;
 }
