@@ -43,12 +43,19 @@ indices = pd.Series(df1.index, index=df1['title']).drop_duplicates()
 
 #Function that takes in movie title as input and outputs most similar movies
 #---------------------------------------------------------------------------
-def get_recommendations(title, cosine_sim=cosine_sim):
+def get_recommendations(title, cosine_sim_matrix):
     #Get the index of the movie matching the title
+    if title not in indices:
+        print("Movie not found.")
+        return []
+    #Handle potential duplicates — take the first one only
     idx = indices[title]
+    if isinstance(idx, pd.Series):
+        print(f"Warning: multiple movies found with title '{title}', using the first.")
+        idx = idx.iloc[0]
 
     #Get the pairwise similarity scores of all movies with that movie
-    sim_scores = list(enumerate(cosine_sim[idx]))
+    sim_scores = list(enumerate(cosine_sim_matrix[idx]))
     #Sort the movies based on the similarity scores
     sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
     #Get the scores of the 10 most similar movies
@@ -120,6 +127,11 @@ cosine_sim2 = cosine_similarity(count_matrix, count_matrix)
 df1 = df1.reset_index()
 indices = pd.Series(df1.index, index=df1['title'])
 
+#Helper function: search for titles containing a keyword
+#-------------------------------------------------------
+def search_titles(keyword):
+    return df1[df1['title'].str.contains(keyword, case=False)]['title'].tolist()
+
 #Final Prints
 #------------
 print("Please enter the name of a movie to give us a "
@@ -127,15 +139,26 @@ print("Please enter the name of a movie to give us a "
 #loops the process (just for testing right now)
 while True:
     movietitle = input()
-    #movietitle = movietitle.lower()
     
     if movietitle in indices:
-        print(get_recommendations(movietitle), cosine_sim2)
+        print("\nRecommendations based on:", movietitle)
+        print(get_recommendations(movietitle, cosine_sim2))
         print("\n")
         print("Please enter another movie:")
     else:
         print ("Movie not found. Please try again:")
 
+        #Try fuzzy suggestions based on partial matches
+        suggestions = search_titles(movietitle)
+        if suggestions:
+            if len(suggestions) == 1:
+                print("\nDid you mean this?")
+            else:
+                print("\nDid you mean one of these?")
+            for title in suggestions:
+                print("-", title)
+        else:
+            print("No similar titles found.")
 
 #Print functions
 #---------------
