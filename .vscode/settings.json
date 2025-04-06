@@ -1,5 +1,14 @@
 {
     "cSpell.words": [
-        "movietitle"
+        "fillna",
+        "iloc",
+        "movietitle",
+        "synsets",
+        "tfidf",
+        "Tfidf",
+        "tmdb",
+        "vectorizer",
+        "Vectorizer",
+        "wordnet"
     ]
 }

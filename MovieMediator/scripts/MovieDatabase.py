@@ -2,69 +2,22 @@ import pandas as pd
 import numpy as np
 import json
 import os
+import nltk
+import torch
+import requests
 from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.metrics.pairwise import linear_kernel
-from sklearn.feature_extraction.text import CountVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from ast import literal_eval
+from nltk.corpus import wordnet
+from sentence_transformers import SentenceTransformer, util
 
 #print(os.getcwd()) #Where the code is running from
 
-df1=pd.read_csv('MovieMediator/Datasets/tmdb_5000_movies.csv')
-df2=pd.read_csv('MovieMediator/Datasets/tmdb_5000_credits.csv')
-#Initialize the dataframe
-df1 = df1[['id', 'title', 'keywords', 'overview', 'genres']]
-df1 = df1.merge(df2, left_on='title', right_on='title')
-df1 = df1.drop(columns=['movie_id'])
+#API key for getting posters
+TMDB_API_KEY = "73b4f8a56d4c5d4442c8b569a755c3b6"
 
-#Loop converting the strings in each of the "features" columns into objects 
-#for easier manipulation
-features = ['cast', 'crew', 'keywords', 'genres']
-for feature in features:
-    df1[feature] = df1[feature].apply(literal_eval)
-
-#Define a TF-IDF Vectorizer Object. Remove english stop words - eg. 'the', 'a'
-tfidf = TfidfVectorizer(stop_words='english')
-#Replace NaN with an empty string
-df1['overview'] = df1['overview'].fillna('')
-#Construct the required TF-IDF matrix by fitting and transforming the data
-tfidf_matrix = tfidf.fit_transform(df1['overview'])
-
-#Compute the cosine similarity matrix
-cosine_sim = linear_kernel(tfidf_matrix, tfidf_matrix)
-#Construct a reverse map of indices and movie titles
-indices = pd.Series(df1.index, index=df1['title']).drop_duplicates()
-#Create a case-insensitive version of indices
-#indices_lower = {title.lower(): index for title, index in indices.items()}
-#print(indices_lower)
-#print(indices)
-
-
-
-#Function that takes in movie title as input and outputs most similar movies
-#---------------------------------------------------------------------------
-def get_recommendations(title, cosine_sim_matrix):
-    #Get the index of the movie matching the title
-    if title not in indices:
-        print("Movie not found.")
-        return []
-    #Handle potential duplicates — take the first one only
-    idx = indices[title]
-    if isinstance(idx, pd.Series):
-        print(f"Warning: multiple movies found with title '{title}', using the first.")
-        idx = idx.iloc[0]
-
-    #Get the pairwise similarity scores of all movies with that movie
-    sim_scores = list(enumerate(cosine_sim_matrix[idx]))
-    #Sort the movies based on the similarity scores
-    sim_scores = sorted(sim_scores, key=lambda x: x[1], reverse=True)
-    #Get the scores of the 10 most similar movies
-    sim_scores = sim_scores[1:11]
-
-    #Get movie indices
-    movie_indices = [i[0] for i in sim_scores]
-    #Return the top 10 most similar movies
-    return df1['title'].iloc[movie_indices]
+#Global helper functions
+########################
 
 #Function that gets the directors name, NaN if not listed
 #--------------------------------------------------------
@@ -74,95 +27,193 @@ def get_director(x):
             return i['name']
     return np.nan
 
-#Find the director in the 'crew' column
-df1['director'] = df1['crew'].apply(get_director)
-
 #Function that returns top 3 elements or full list depending on which is larger
 #----------------------------------------------------------------
 def get_list(x):
     if isinstance(x, list):
         names = [i['name'] for i in x]
-        #Check if more than 3 elements exist. If yes, return only first three. 
-        #If no, return entire list.
         if len(names) > 3:
             names = names[:3]
         return names
-
-    #Return empty list in case of missing/malformed data
     return []
-
-#Redefine features, and apply get_list to provide top 3 for each list
-features = ['cast', 'keywords', 'genres']
-for feature in features:
-    df1[feature] = df1[feature].apply(get_list)
 
 #Function to convert all strings to lower case and strip names of spaces
 #------------------------------------------------------------------------
 def clean_data(x):
     if isinstance(x, list):
         return [str.lower(i.replace(" ", "")) for i in x]
+    elif isinstance(x, str):
+        return str.lower(x.replace(" ", ""))
     else:
-        #Check if director exists. If not, return empty string
-        if isinstance(x, str):
-            return str.lower(x.replace(" ", ""))
-        else:
-            return ''
-        
-#Apply clean_data function to your features.
-features = ['cast', 'keywords', 'director', 'genres']
-for feature in features:
-    df1[feature] = df1[feature].apply(clean_data)
+        return ''
 
 #Metadata soup
 #-------------
 def create_soup(x):
     return ' '.join(x['keywords']) + ' ' + ' '.join(x['cast']) + ' ' + x['director'] + ' ' + ' '.join(x['genres'])
-df1['soup'] = df1.apply(create_soup, axis=1)
 
-count = CountVectorizer(stop_words='english')
-count_matrix = count.fit_transform(df1['soup'])
+#Expand buzzwords with synonyms using WordNet
+#--------------------------------------------
+def expand_buzzwords_with_synonyms(buzzwords):
+    words = buzzwords.lower().split()
+    expanded = set(words)
+    for word in words:
+        for syn in wordnet.synsets(word):
+            for lemma in syn.lemmas():
+                expanded.add(lemma.name().replace("_", " "))
+    return ' '.join(expanded)
 
-cosine_sim2 = cosine_similarity(count_matrix, count_matrix)
+#Semantic search using SentenceTransformer
+#------------------------------------------------------------------------
+def semantic_buzzword_search(query, model, movie_embeddings, df, top_n=3):
+    query_embedding = model.encode(query, convert_to_tensor=True)
+    cosine_scores = util.cos_sim(query_embedding, movie_embeddings)[0]
+
+    #Convert to numpy arrays for manipulation
+    scores = cosine_scores.cpu().numpy()
+    ratings = df['normalized_rating'].values
+
+    #Blend cosine similarity and rating
+    final_scores = 0.90 * scores + 0.10 * ratings  #Adjust weighting as needed
+
+    #Get sorted indices
+    sorted_indices = final_scores.argsort()[::-1]
+
+    #Return full sorted list (title, score) - saves other options for re-roll
+    results = []
+    for idx in sorted_indices:
+        title = df.iloc[idx]['title']
+        score = round(float(final_scores[idx]), 3)
+        poster_url = df.iloc[idx].get('poster_url', None)
+        results.append((title, score, poster_url))
+
+    return results
+
+#Function to get poster URL from TMDB
+#--------------------------------------------------------
+def get_movie_poster(title):
+    try:
+        url = f"https://api.themoviedb.org/3/search/movie"
+        params = {
+            "api_key": TMDB_API_KEY,
+            "query": title
+        }
+        response = requests.get(url, params=params)
+        data = response.json()
+        if data['results']:
+            poster_path = data['results'][0].get('poster_path')
+            if poster_path:
+                return f"https://image.tmdb.org/t/p/w500{poster_path}"
+        return None
+    except Exception as e:
+        print(f"Error fetching poster for {title}: {e}")
+    return None
+
+#Load semantic model
+####################
+model = SentenceTransformer('all-MiniLM-L6-v2')  #Small, fast, powerful
+
+#Try loading cached data
+if os.path.exists("MovieMediator/embeddings.pt") and os.path.exists("MovieMediator/preprocessed_df.pkl"):
+    print("Loading cached embeddings and dataframe...")
+    movie_embeddings = torch.load("MovieMediator/embeddings.pt")
+    df1 = pd.read_pickle("MovieMediator/preprocessed_df.pkl")
+
+else:
+    print("First run: processing everything...")
+
+    df1 = pd.read_csv('MovieMediator/Datasets/tmdb_5000_movies.csv')
+    df2 = pd.read_csv('MovieMediator/Datasets/tmdb_5000_credits.csv')
+    #Initialize the dataframe
+    df1 = df1[['id', 'title', 'keywords', 'overview', 'genres', 'vote_average']]
+    df1 = df1.merge(df2, left_on='title', right_on='title')
+    df1 = df1.drop(columns=['movie_id'])
+    df1['normalized_rating'] = df1['vote_average'] / 10  #tmdb ratings are out of 10
+
+    #Loop converting the strings in each of the "features" columns into objects 
+    #for easier manipulation
+    features = ['cast', 'crew', 'keywords', 'genres']
+    for feature in features:
+        df1[feature] = df1[feature].apply(literal_eval)
+
+    #Define a TF-IDF Vectorizer Object. Remove english stop words - eg. 'the', 'a'
+    tfidf = TfidfVectorizer(stop_words='english')
+    #Replace NaN with an empty string
+    df1['overview'] = df1['overview'].fillna('')
+    #Construct the required TF-IDF matrix by fitting and transforming the data
+    tfidf_matrix = tfidf.fit_transform(df1['overview'])
+
+    #Find the director in the 'crew' column
+    df1['director'] = df1['crew'].apply(get_director)
+
+    #Redefine features, and apply get_list to provide top 3 for each list
+    features = ['cast', 'keywords', 'genres']
+    for feature in features:
+        df1[feature] = df1[feature].apply(get_list)
+
+    #Apply clean_data function to your features.
+    features = ['cast', 'keywords', 'director', 'genres']
+    for feature in features:
+        df1[feature] = df1[feature].apply(clean_data)
+
+    df1['soup'] = df1.apply(create_soup, axis=1)
+
+    #Clean titles just in case (safety)
+    df1['title'] = df1['title'].astype(str).str.strip()
+
+    #Preload and cache poster URLs (once)
+    print("Fetching and caching poster URLs (first run only)...")
+    df1['poster_url'] = df1['title'].apply(lambda title: get_movie_poster(title) or None)
+
+    #Load semantic model and encode all movie soups
+    movie_embeddings = model.encode(df1['soup'], convert_to_tensor=True)
+
+    #Save processed data and embeddings to avoid reprocessing
+    torch.save(movie_embeddings, "MovieMediator/embeddings.pt")
+    df1.to_pickle("MovieMediator/preprocessed_df.pkl")
+
+#Vectorizer for buzzword overlap fallback (not required, but can help)
+vectorizer = TfidfVectorizer(stop_words='english')
+tfidf_soup_matrix = vectorizer.fit_transform(df1['soup'])
 
 df1 = df1.reset_index()
-indices = pd.Series(df1.index, index=df1['title'])
-
-#Helper function: search for titles containing a keyword
-#-------------------------------------------------------
-def search_titles(keyword):
-    return df1[df1['title'].str.contains(keyword, case=False)]['title'].tolist()
 
 #Final Prints
-#------------
-print("Please enter the name of a movie to give us a "
-      "base for your recommendations:")
-#loops the process (just for testing right now)
+#--------------------------------------------------------------------
+print("Welcome to The Movie Mediator!\n")
+
 while True:
-    movietitle = input()
-    
-    if movietitle in indices:
-        print("\nRecommendations based on:", movietitle)
-        print(get_recommendations(movietitle, cosine_sim2))
-        print("\n")
-        print("Please enter another movie:")
-    else:
-        print ("Movie not found. Please try again:")
+    buzz = input("Enter descriptive words (e.g. Fantasy Fish Animation): ")
+    all_results = semantic_buzzword_search(buzz, model, movie_embeddings, df1)
 
-        #Try fuzzy suggestions based on partial matches
-        suggestions = search_titles(movietitle)
-        if suggestions:
-            if len(suggestions) == 1:
-                print("\nDid you mean this?")
+    page = 0
+    per_page = 3
+
+    while True:
+        print("\nTop matches:")
+        #returns results (0:3), (3:6), (6:9) etc
+        current_results = all_results[page * per_page : (page + 1) * per_page]
+
+        if not current_results:
+            print("No more results to show.")
+            break
+
+        for title, score, poster_url in current_results:
+            print(f"- {title} (score: {score})")
+            if poster_url:
+                print(f"Poster: {poster_url}")
             else:
-                print("\nDid you mean one of these?")
-            for title in suggestions:
-                print("-", title)
+                print("Poster not found.")
+
+        command = input("\nType 'r' to reroll, 'b' to go back, 'q' to quit to main menu: ").strip().lower()
+        if command == 'r':
+            page += 1
+        elif command == 'b':
+            if page > 0:
+                page -= 1
+            else:
+                print("You're already at the first page.")
+        elif command == 'q':
+            break
         else:
-            print("No similar titles found.")
-
-#Print functions
-#---------------
-
-#print(df1[['title', 'cast', 'director', 'keywords', 'genres']].head())
-#print(df1['title'].head(3))
-#print(df1['overview'].head(3))
+            print("Invalid command.")
