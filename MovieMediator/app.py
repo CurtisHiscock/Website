@@ -65,6 +65,8 @@ def send_css(path):
 def send_image(path):
     return send_from_directory('images', path)
 
+#Flask app entry point handled by cPanel
+
 #Run the Flask app
-if __name__ == "__main__":
-    app.run(debug=True)
+#if __name__ == "__main__":
+#    app.run(debug=True)
