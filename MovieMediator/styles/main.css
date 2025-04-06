@@ -1,0 +1,200 @@
+/* Navbar Styles */
+.navbar {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    background-color: #181C25;
+    padding: 1em 2em;
+    min-height: 5em; /* ensure enough height */
+    border-bottom: 0.1em solid #2a2f3c;
+}
+
+.container {
+    max-width: 80em; /* keeps things readable on large monitors */
+    margin: 0 auto; /* centers it */
+    padding: 0 1em; /* small side padding for mobile */
+    box-sizing: border-box;
+}
+  
+#results {
+    justify-content: center;
+    gap: 3em;
+    flex-wrap: wrap;
+}
+
+.logo-title {
+    position: absolute;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    gap: 0.75em;
+}
+  
+.logo {
+    height: 4em;
+}
+  
+.navbar .button {
+    color: #C27089;
+    text-decoration: none;
+    font-weight: bold;
+    font-size: 1rem;
+}
+  
+.navbar .button:hover {
+    text-decoration: underline;
+}
+  
+.logo {
+    height: 4em;
+}
+  
+.navbar h1 {
+    font-size: 2rem;
+    font-weight: bold;
+    color: #DBE9EE;
+}
+  
+/* General Page Styles */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #212631;
+    color: #DBE9EE;
+    margin: 0;
+    padding: 0;
+    text-align: center;
+}
+  
+button {
+    padding: 0.75em 1.5em;
+    font-size: 1rem;
+    margin: 1em 0.5em;
+    border: none;
+    border-radius: 0.5em;
+    background-color: #AB4967;
+    color: #DBE9EE;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+  
+button:hover {
+    background-color: #81374D;
+}
+  
+a.button {
+    text-decoration: none;
+    color: #AB4967;
+    font-weight: bold;
+    margin-right: 1em;
+    font-size: 1rem;
+}
+  
+a.button:hover {
+    text-decoration: underline;
+}
+  
+/* 🔽 Inserted Search Bar Styling */
+.search-bar {
+    display: flex;
+    justify-content: center;
+    margin-top: 2em;
+}
+  
+.search-bar input {
+    width: 100%;
+    max-width: 30em;
+    padding: 0.75em;
+    font-size: 1rem;
+    border: none;
+    border-radius: 0.5em 0 0 0.5em;
+    background-color: #2b3141;
+    color: #DBE9EE;
+    outline: none;
+}
+
+.search-bar input::placeholder {
+    color: #DBE9EE;
+    opacity: 0.6; /* ensures it's fully visible */
+}
+  
+.search-bar button {
+    padding: 0.75em 1.5em;
+    font-size: 1rem;
+    border: none;
+    border-radius: 0 0.5em 0.5em 0;
+    background-color: #AB4967;
+    color: #DBE9EE;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+    margin: 0;
+}
+  
+.search-bar button:hover {
+    background-color: #81374D;
+}
+  
+/* Results Area */
+#results {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 4em;
+    padding: 3em;
+}
+  
+.movie {
+    max-width: 21em;
+    opacity: 0; /* initial state */
+    animation: fadeIn 0.6s ease forwards;
+    flex: 1 1 18em; /* allows shrinking */
+    max-width: 21em;
+}
+  
+.movie img {
+    width: 100%;
+    border-radius: 0.75em;
+    box-shadow: 0 0 0.5em #181C25;
+    margin-bottom: 0.5em;
+}
+  
+.movie h2 {
+    font-size: 1.25rem;
+    margin: 0.5em 0 0;
+    color: #DBE9EE;
+}
+  
+/* Nav Buttons (bottom) */
+.nav-buttons {
+    display: flex;
+    justify-content: center;
+    margin: 1em 0;
+}
+  
+.nav-buttons button {
+    margin: 0 1.2em;
+    border: none;
+    cursor: pointer;
+}
+  
+.nav-buttons button img.icon {
+    height: 4em;
+    width: auto;
+    transition: transform 0.2s ease;
+}
+  
+.nav-buttons button:hover img.icon {
+    transform: scale(1.1);
+}
+
+@keyframes fadeIn {
+    from {
+      opacity: 0;
+      transform: translateY(4em);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }

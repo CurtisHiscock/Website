@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <link rel="stylesheet" href="../styles/main.css">
+        <script src="../scripts/main.js"></script>
+        <title>Movie Mediator</title>
+    </head>
+
+    
+    <header>
+        <nav class="navbar">
+            <div class="logo-title">
+                <h1>The Movie Mediator</h1>
+                <img src="../images/Logo.png" alt="The Movie Mediator Logo" class="logo">
+            </div>
+            <a href="../../CurtisHiscock Website/index.html" class="button">Back to home</a>
+        </nav>
+    </header>
+
+    <main class="container">
+
+        <div class="search-bar">
+            <input type="text" id="queryInput" placeholder="Enter descriptive words (e.g. Fantasy Fish Animation)">
+            <button onclick="searchMovies()">Search</button>
+        </div>
+
+        <div id="results">
+        
+        </div>
+
+
+        <div class="nav-buttons">
+            <button onclick="prevPage()">
+                <img src="../images/Undo.png" alt="Back" class="icon">
+            </button>
+            <button onclick="nextPage()">
+                <img src="../images/Dice.png" alt="Re-Roll" class="icon">
+            </button>
+        </div>
+
+    </main>
+
+
+</body>
+</html>
