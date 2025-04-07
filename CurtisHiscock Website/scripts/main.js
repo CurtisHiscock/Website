@@ -29,4 +29,26 @@ document.addEventListener("DOMContentLoaded", () => {
         }, 2000);
       });
     });
+
+  //Fade-in observer
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('visible');
+        observer.unobserve(entry.target); //fade in once
+      }
+    });
+  }, {
+    threshold: 0.1
   });
+
+  //Target all sections and project cards
+  const fadeElements = document.querySelectorAll('#home, #about-me, #projects, #contact, .project-card');
+  fadeElements.forEach(el => {
+    el.classList.add('fade-in');
+    observer.observe(el);
+  });
+
+});
+
+ 
