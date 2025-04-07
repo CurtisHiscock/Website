@@ -6,59 +6,125 @@
     <link rel="stylesheet" href="./styles/main.css">
     <link rel="icon" href="./images/WhiteCH.png" media="(prefers-color-scheme: dark)">
     <link rel="icon" href="./images/GreenCH.png" media="(prefers-color-scheme: light)">
+    <script src="./scripts/main.js"></script>
     <title>Homepage</title>
 </head>
 
 <body>
     <header>
         <nav>
-            <button onclick="scrollToSection('about me')">About Me</button>
+            <button onclick="scrollToSection('about-me')">About Me</button>
             <button onclick="scrollToSection('projects')">Projects</button>
             <button onclick="scrollToSection('contact')">Contact</button>
         </nav>
     </header>
 
 
-<section id="home">
-<img src="/CurtisHiscock Website/images/MainBanner.png" alt="A mysterious man stares longingly into the lake">
-<button onclick="scrollToSection('about me')">V</button>
+<section id="home" class="hero">
+<img src="/CurtisHiscock Website/images/MainBanner.png" alt="Hero Image" class="hero-image">
+<button onclick="scrollToSection('about-me')" class="arrow-btn">&#x2B07;</button>
 </section>
 
-<section id="about me">
+<section id="about-me">
     <h1>Hi, I'm Curtis</h1>
     <h2>Creative developer focused on AI, web, and game design</h2>
     <p>
-        I’m a Computing Systems and Media Studies student at Trent University with a minor in Cultural Studies. <br>
-        Over the course of my degree, I’ve grown as a developer with a recent focus on artificial intelligence, <br>
-        machine learning in Python, and web development. <br>
-        I’ll be graduating in April 2025 and am looking for a role that challenges me while helping expand my skills. <br>
-        I love building meaningful and creative tech – from more accessible web experiences to <br>
-        engaging, interactive games.
+        I’m a Computing Systems and Media Studies student at Trent University with a 
+        minor in Cultural Studies. Over the course of my degree, I’ve grown as a 
+        developer with a recent focus on artificial intelligence, machine learning 
+        in Python, and web development. I’ll be graduating in April 2025 and am 
+        looking for a role that challenges me while helping expand my skills. I love 
+        building meaningful and creative tech – from more accessible web experiences 
+        to engaging, interactive games.
     </p>
 </section>
 
 <section id="projects">
     <h1>Projects</h1>
-    <a href="../MovieMediator/templates/index.html" class="button">MovieMediator.com</a>
-    <p>Valorant VCT predictor</p>
-    <p>Here are a few of my games that I coded myself</p>
-    <p>Pokemon Server in C</p>
-    <p>JavaScript Tasks</p>
+    
+    <div class="project-card">
+        <img src="./images/TMM.png" alt="TheMovieMediator" class="proj-img">
+        <div class="project-info">
+          <a href="https://github.com/CurtisHiscock/Website/tree/master/MovieMediator" target="_blank" class="project-title">TheMovieMediator.com</a>
+          <p class="description">
+            The Movie Mediator is a web-based movie recommendation tool I built to help users discover 
+            films based on custom buzzwords or themes. I developed the backend by converting 
+            my existing Python program into a web app using Flask — something completely new 
+            to me. I also integrated a semantic search engine powered by natural language 
+            embeddings and cosine similarity. The app features dynamic poster rendering, 
+            reroll options for new suggestions, and a clean user interface. I'm currently 
+            in the process of deploying the app using cPanel, with a focus on performance 
+            optimization and maintaining a modular design. It's been a difficult, yet 
+            rewarding project that I’m excited to see fully come to life.
+          </p>
+          <p class="skills">Technical Skills Required: Flask Web Development, Data Manipulation and Processing, Frontend/ UI Integration</p>
+        </div>
+      </div>
+
+      <div class="project-card">
+        <img src="./images/code.png" alt="Image from https://pixabay.com/photos/code-programming-javascript-5113374/" class="proj-img">
+        <div class="project-info">
+          <a href="https://github.com/CurtisHiscock/COIS-2430-Assn3" target="_blank" class="project-title">JavaScript Tasks</a>
+          <p class="description">
+            This assignment focused on JavaScript interactivity and DOM manipulation 
+            across multiple tasks. I implemented a series of functional JavaScript features, 
+            including dynamic array operations, real-time user interaction, event-based DOM 
+            traversal, and integrating both local and external data using a public currency 
+            conversion API. The project emphasized modular scripting, styling with CSS, and 
+            writing clean, testable code.
+          </p>
+          <p class="skills">Technical Skills Required: JavaScript Event Handling, Modular Development and Git Workflow, API Integration</p>
+        </div>
+      </div>
+
+      <div class="project-card">
+        <img src="./images/pokemon.png" alt="Pokemon Image from https://pixabay.com/illustrations/team-instinct-pokemon-pokemon-go-1572480/" class="proj-img">
+        <div class="project-info">
+          <a href="https://github.com/CurtisHiscock/COIS-3380-Pokemon-Server" target="_blank" class="project-title">Pokemon Server in C</a>
+          <p class="description">
+            For this systems programming project, I developed a modular client-server application in C 
+            called the Pokémon Property Server. The server loads and manages a dataset of Pokémon, 
+            allowing clients to connect via TCP and query for specific properties such as type stats. 
+            I implemented multithreading to ensure responsiveness during concurrent queries and background 
+            file operations. The application was also structured with clean modular separation and compiled 
+            using a Makefile for maintainability and scalability
+          </p>
+          <p class="skills">Technical Skills Required: Socket programming in C, Multithreading, Build Management</p>
+        </div>
+      </div>
+
+      <div class="project-card">
+        <img src="./images/Game.png" alt="Crash Landed Screenshot" class="proj-img">
+        <div class="project-info">
+          <a href="https://curtishiscock.itch.io/" target="_blank" class="project-title">Game Development</a>
+          <p class="description">
+            During my studies at Trent, I took several courses in game design and game studies. 
+            It was during these courses that I created two original games from the ground up. 
+            Each project required months of testing to ensure not only that the games ran 
+            smoothly, but also that they were enjoyable and intuitive. Because these games 
+            were also some of my first large solo projects, they demanded strong time 
+            management skills to keep development on schedule
+          </p>
+          <p class="skills">Technical Skills Required: Coding in C#, Debugging Testing and Optimization, Scene Design in Unity </p>
+        </div>
+      </div>
+
 
 </section>
 
 <section id="contact">
     <h1>Contact</h1>
-    <button id="runaway">Call me</button> <br>
-    <button>curtis@email.com</button>
-
-    <p>Here's my other stuff:</p>
-    <a href="https://github.com/CurtisHiscock"target=blank>GitHub</a>
-    <br>
-    <a href="https://curtishiscock.itch.io/"target=blank>Itch.io</a>
-    <br>
-    <a href="https://www.linkedin.com/in/curtis-hiscock-137742200/"target=blank>LinkedIn</a>
+    <button id="copyEmail">curtishiscock1@gmail.com</button>
+    <div id="copiedMsg">Copied to clipboard</div>
 </section>
+
+<footer>
+    <div class="footer-links">
+        <a href="https://github.com/CurtisHiscock" target="_blank">GitHub</a>
+        <a href="https://www.linkedin.com/in/curtis-hiscock-137742200/" target="_blank">LinkedIn</a>
+        <a href="https://curtishiscock.itch.io/" target="_blank">Itch.io</a>
+    </div>
+</footer>
 
 </body>
 </html>
