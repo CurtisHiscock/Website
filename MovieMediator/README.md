@@ -5,6 +5,8 @@ Picking the right movie to watch can be a chore, and sometimes you spend longer 
 The Movie Mediator is a semantic movie recommendation app that suggests films based on buzzwords that **you** provide. Just tell us exactly what you're feeling and we'll recommend something great! 
 Using sentence embeddings and cosine similarity, the app finds the best matches from the [TMDB_5000 Movie dataset](https://www.kaggle.com/datasets/tmdb/tmdb-movie-metadata) and returns them alongside poster images and confidence scores.
 
+![Website UI](./images/Screenshot.png)
+
 ---
 
 ## Features
